@@ -44,11 +44,12 @@ class TextBox():
     
     def update(self,e):
         if e.type==pg.MOUSEBUTTONDOWN:
-            p = e.pos
-            p = (p[0]-self.sdpos[0],p[1]-self.sdpos[1])
-            if checkB(p,self.pos1,self.size1):
-                self.inFocus = True
-                pg.key.start_text_input()
+            if e.button == 1:
+                p = e.pos
+                p = (p[0]-self.sdpos[0],p[1]-self.sdpos[1])
+                if checkB(p,self.pos1,self.size1):
+                    self.inFocus = True
+                    pg.key.start_text_input()
         elif e.type == pg.KEYDOWN:
             if self.inFocus:
                 if e.key == pg.K_RETURN:
@@ -101,7 +102,7 @@ class TextBox():
             
 
 class Buttons():
-    def __init__(self, pos, size, colors, type, text, defa, font = None, sound = None, img1 = None, img2 = None):
+    def __init__(self, pos, size, colors, type, text, defa, font=None, sound=None, img1=None, img2=None):
         self.pos = pos
         self.size = size
         self.sdpos=(0,0)
@@ -118,25 +119,29 @@ class Buttons():
         self.mpos = (0,0)
         self.click = False
         self.clb = 0
-        self.font = pg.font.SysFont('arial', int(size[1]-20))
+        self.font = pg.font.SysFont('arial', int(size[1]-26))
+        self.clickg = 0
         self.on = False
         if font != None:
             self.font = font
     
     def update(self,e):
         if e.type == pg.MOUSEBUTTONDOWN:
-            self.clb = 0
-            self.mpos = e.pos
-            self.mpos = (self.mpos[0]-self.sdpos[0],self.mpos[1]-self.sdpos[1])
-            if checkB(self.mpos,self.pos,self.size):
-                self.click = True
-                if self.sound != None:
-                    self.sound.play()
-            else:
-                self.click = False
+            self.clickg = e.button
+            if e.button == 1:
+                self.clb = 0
+                self.mpos = e.pos
+                self.mpos = (self.mpos[0]-self.sdpos[0],self.mpos[1]-self.sdpos[1])
+                if checkB(self.mpos,self.pos,self.size):
+                    self.click = True
+                    if self.sound != None:
+                        self.sound.play()
+                else:
+                    self.click = False
         elif e.type == pg.MOUSEBUTTONUP:
-            self.clb = 1
+            self.clickg = 0
             if self.click:
+                self.clb = 1
                 self.click = False
                 if checkB(self.mpos,self.pos,self.size):
                     if self.type == 'click':
@@ -157,7 +162,8 @@ class Buttons():
                         self.clb = 2
                 if self.clb == 0:
                     self.clb = 1
-                self.click = True
+                if self.clickg == 1:
+                    self.click = True
             else:
                 self.click = False
                 self.clb = 0
@@ -212,14 +218,15 @@ class Slider():
     
     def update(self,e):
         if e.type == pg.MOUSEBUTTONDOWN:
-            pos = e.pos
-            pos = (pos[0]-self.sdpos[0],pos[1]-self.sdpos[1])
-            if checkB(pos,self.pos,self.size):
-                self.click=True
-                for i in range(len(self.znach)):
-                    if pos[0] > self.perspos*i+self.pos[0] and pos[0] < self.perspos*(i+1)+self.pos[0]:
-                        self.input = self.znach[i]
-    
+            if e.button == 1:
+                pos = e.pos
+                pos = (pos[0]-self.sdpos[0],pos[1]-self.sdpos[1])
+                if checkB(pos,self.pos,self.size):
+                    self.click=True
+                    for i in range(len(self.znach)):
+                        if pos[0] > self.perspos*i+self.pos[0] and pos[0] < self.perspos*(i+1)+self.pos[0]:
+                            self.input = self.znach[i]
+
         if e.type == pg.MOUSEMOTION and self.click:
             pos = e.pos
             pos = (pos[0]-self.sdpos[0],pos[1]-self.sdpos[1])
@@ -240,7 +247,8 @@ class Slider():
 
 
 class gHotbar():
-    def __init__(self,pos,num,ac,img1,img2,imgItems,numbers,font = None):
+    def __init__(self,pos,num,ac,img1,img2,imgItems,numbers,rotMouse=False, font = None):
+        self.rotM = rotMouse
         self.pos = pos
         self.sdpos=(0,0)
         self.num = num
@@ -251,23 +259,26 @@ class gHotbar():
         self.y = img1.get_rect()[3]
         self.imgs = imgItems
         self.numbers = numbers
-        self.font = font if font != None else pg.font.SysFont('arial',64)
+        self.font = font if font != None else pg.font.SysFont('arial', self.y-40)
     
     def update(self,e):
         if e.type == pg.MOUSEBUTTONDOWN:
-            p = e.pos
-            p = (p[0]-self.sdpos[0],p[1]-self.sdpos[1])
-            if checkB(p,self.pos,(self.x * self.num,self.y)):
-                for i in range(self.num):
-                    if e.pos[0] > self.pos[0]+self.x*i and e.pos[0] < self.pos[0]+self.x*(i+1):
-                        self.ac = i
-        elif e.type == pg.MOUSEMOTION:
-            p = e.pos
-            p = (p[0]-self.sdpos[0],p[1]-self.sdpos[1])
-            if checkB(p,self.pos,(self.x * self.num,self.y)):
-                for i in range(self.num):
-                    if e.pos[0] > self.pos[0]+self.x*i and e.pos[0] < self.pos[0]+self.x*(i+1):
-                        self.active = i
+            if e.button == 1:
+                p = e.pos
+                p = (p[0]-self.sdpos[0],p[1]-self.sdpos[1])
+                if checkB(p,self.pos,(self.x * self.num,self.y)):
+                    for i in range(self.num):
+                        if e.pos[0] > self.pos[0]+self.x*i and e.pos[0] < self.pos[0]+self.x*(i+1):
+                            self.active = i
+            if self.rotM:
+                if e.button == 5:
+                    self.active += 1
+                    if self.active > self.num-1:
+                        self.active = 0
+                elif e.button == 4:
+                    self.active += -1
+                    if self.active < 0:
+                        self.active = self.num-1
      
     def render(self,surf):
         for i in range(self.num):
@@ -289,7 +300,7 @@ class Rect():
         self.r = r
     
     def render(self,surf):
-        pg.draw.rect(surf,self.c,(self.p,self.s),r)
+        pg.draw.rect(surf,self.c,(self.p,self.s),self.r)
 
 class Circle():
     def __init__(self,color,pos,r,r1):
@@ -299,10 +310,10 @@ class Circle():
         self.r1 = r1
     
     def render(self,surf):
-        pg.draw.circle(surf,self.c,self.p,self.r,r1)
+        pg.draw.circle(surf,self.c,self.p,self.r,self.r1)
 
 class label():
-    def __init__(self,pos,text,font = None,s = 24,c = None):
+    def __init__(self,pos,text,c = None,s = 24,font = None):
         self.text = text
         self.pos = pos
         self.c = (255,255,255) if c == None else  c
@@ -430,14 +441,6 @@ class Swip():
         for _ in self.bs:
             _.render(s,(_.p[0],_.p[1] - self.p[1]))
         surf.blit(s,self.p)
-
-
-def surfUpdate(m):
-    if m == 0:
-        surf.fill(pg.Color('black'))
-    if m == 1:
-        pg.display.flip()
-        clock.tick()
         
 if __name__ == "__main__":
     import random
