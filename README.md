@@ -1,1 +1,1 @@
-hello from alexCoder23
+Библиотека для создания gui в играх PyGame
